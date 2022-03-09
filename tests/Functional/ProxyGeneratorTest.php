@@ -16,8 +16,6 @@ use function Zenstruck\Foundry\without_autorefresh;
  */
 final class ProxyGeneratorTest extends ProxyTest
 {
-    protected static $POST_FACTORY = PostFactoryWithProxyGenerator::class;
-
     /**
      * @test
      */
@@ -30,6 +28,14 @@ final class ProxyGeneratorTest extends ProxyTest
      * @test
      */
     public function can_remove_and_assert_not_persisted(): void
+    {
+        $this->markTestSkipped('assertNotPersisted() is not supported');
+    }
+
+    /**
+     * @test
+     */
+    public function can_assert_not_persisted(): void
     {
         $this->markTestSkipped('assertNotPersisted() is not supported');
     }
@@ -55,14 +61,14 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function can_force_set_and_save(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title']);
 
-        static::$POST_FACTORY::assert()->notExists(['title' => 'new title']);
+        $this->postFactoryClass()::assert()->notExists(['title' => 'new title']);
 
         force_set($post, 'title', 'new title');
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
-        static::$POST_FACTORY::assert()->exists(['title' => 'new title']);
+        $this->postFactoryClass()::assert()->exists(['title' => 'new title']);
     }
 
     /**
@@ -70,14 +76,14 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function can_force_set_multiple_fields(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         $this->assertSame('old title', $post->getTitle());
         $this->assertSame('old body', $post->getBody());
 
         force_set($post, 'title', 'new title');
         force_set($post, 'body', 'new body');
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $this->assertSame('new title', $post->getTitle());
         $this->assertSame('new body', $post->getBody());
@@ -88,7 +94,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function exception_thrown_if_trying_to_autorefresh_object_with_unsaved_changes(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         $this->assertSame('old title', $post->getTitle());
         $this->assertSame('old body', $post->getBody());
@@ -105,7 +111,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function can_autorefresh_between_kernel_boots(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         $this->assertSame('old title', $post->getTitle());
         $this->assertSame('old body', $post->getBody());
@@ -150,7 +156,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function force_set_all_solves_the_auto_refresh_problem(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         $this->assertSame('old title', $post->getTitle());
         $this->assertSame('old body', $post->getBody());
@@ -159,7 +165,7 @@ final class ProxyGeneratorTest extends ProxyTest
             'title' => 'new title',
             'body' => 'new body',
         ]);
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $this->assertSame('new title', $post->getTitle());
         $this->assertSame('new body', $post->getBody());
@@ -170,7 +176,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function without_auto_refresh_solves_the_auto_refresh_problem(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         $this->assertSame('old title', $post->getTitle());
         $this->assertSame('old body', $post->getBody());
@@ -179,7 +185,7 @@ final class ProxyGeneratorTest extends ProxyTest
             $post->setTitle('new title');
             $post->setBody('new body');
         });
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $this->assertSame('new title', $post->getTitle());
         $this->assertSame('new body', $post->getBody());
@@ -190,7 +196,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function without_auto_refresh_does_not_enable_auto_refresh_if_it_was_disabled_originally(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         disable_autorefresh($post);
 
@@ -205,7 +211,7 @@ final class ProxyGeneratorTest extends ProxyTest
         $post->setTitle('another new title');
         $post->setBody('another new body');
 
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $this->assertSame('another new title', $post->getTitle());
         $this->assertSame('another new body', $post->getBody());
@@ -216,7 +222,7 @@ final class ProxyGeneratorTest extends ProxyTest
      */
     public function without_auto_refresh_keeps_disabled_if_originally_disabled(): void
     {
-        $post = static::$POST_FACTORY::createOne(['title' => 'old title', 'body' => 'old body']);
+        $post = $this->postFactoryClass()::createOne(['title' => 'old title', 'body' => 'old body']);
 
         disable_autorefresh($post);
 
@@ -228,14 +234,29 @@ final class ProxyGeneratorTest extends ProxyTest
             $post->setBody('new body');
         });
 
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $post->setTitle('another new title');
         $post->setBody('another new body');
 
-        static::$POST_FACTORY::save($post);
+        $this->postFactoryClass()::save($post);
 
         $this->assertSame('another new title', $post->getTitle());
         $this->assertSame('another new body', $post->getBody());
+    }
+
+    protected function postFactoryClass(): string
+    {
+        return PostFactoryWithProxyGenerator::class;
+    }
+
+    protected function postClass(): string
+    {
+        return Post::class;
+    }
+
+    protected function registryServiceId(): string
+    {
+        return 'doctrine';
     }
 }

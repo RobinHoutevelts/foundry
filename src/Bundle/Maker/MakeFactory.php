@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Foundry\Bundle\Maker;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
@@ -20,6 +21,32 @@ use Zenstruck\Foundry\ModelFactory;
  */
 final class MakeFactory extends AbstractMaker
 {
+    private const ORM_DEFAULTS = [
+        'ARRAY' => '[],',
+        'ASCII_STRING' => 'self::faker()->text(),',
+        'BIGINT' => 'self::faker()->randomNumber(),',
+        'BLOB' => 'self::faker()->text(),',
+        'BOOLEAN' => 'self::faker()->boolean(),',
+        'DATE' => 'self::faker()->datetime(),',
+        'DATE_MUTABLE' => 'self::faker()->datetime(),',
+        'DATE_IMMUTABLE' => 'self::faker()->datetime(),',
+        'DATETIME_MUTABLE' => 'self::faker()->datetime(),',
+        'DATETIME_IMMUTABLE' => 'self::faker()->datetime(),',
+        'DATETIMETZ_MUTABLE' => 'self::faker()->datetime(),',
+        'DATETIMETZ_IMMUTABLE' => 'self::faker()->datetime(),',
+        'DECIMAL' => 'self::faker()->randomFloat(),',
+        'FLOAT' => 'self::faker()->randomFloat(),',
+        'INTEGER' => 'self::faker()->randomNumber(),',
+        'JSON' => '[],',
+        'JSON_ARRAY' => '[],',
+        'SIMPLE_ARRAY' => '[],',
+        'SMALLINT' => 'self::faker()->numberBetween(1, 32767),',
+        'STRING' => 'self::faker()->text(),',
+        'TEXT' => 'self::faker()->text(),',
+        'TIME_MUTABLE' => 'self::faker()->datetime(),',
+        'TIME_IMMUTABLE' => 'self::faker()->datetime(),',
+    ];
+
     /** @var ManagerRegistry */
     private $managerRegistry;
 
@@ -47,6 +74,11 @@ final class MakeFactory extends AbstractMaker
         return 'Creates a Foundry model factory for a Doctrine entity class';
     }
 
+    public function configureDependencies(DependencyBuilder $dependencies): void
+    {
+        // noop
+    }
+
     public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
@@ -54,6 +86,7 @@ final class MakeFactory extends AbstractMaker
             ->addArgument('entity', InputArgument::OPTIONAL, 'Entity class to create a factory for')
             ->addOption('namespace', null, InputOption::VALUE_REQUIRED, 'Customize the namespace for generated factories', 'Factory')
             ->addOption('test', null, InputOption::VALUE_NONE, 'Create in <fg=yellow>tests/</> instead of <fg=yellow>src/</>')
+            ->addOption('all-fields', null, InputOption::VALUE_NONE, 'Create defaults for all entity fields, not only required fields')
         ;
 
         $inputConfig->setArgumentAsNonInteractive('entity');
@@ -70,16 +103,32 @@ final class MakeFactory extends AbstractMaker
             $io->newLine();
         }
 
+        if (!$input->getOption('all-fields')) {
+            $io->text('// Note: pass <fg=yellow>--all-fields</> if you want to generate default values for all fields, not only required fields');
+            $io->newLine();
+        }
+
         $argument = $command->getDefinition()->getArgument('entity');
-        $entity = $io->choice($argument->getDescription(), $this->entityChoices());
+        $entity = $io->choice($argument->getDescription(), \array_merge($this->entityChoices(), ['All']));
 
         $input->setArgument('entity', $entity);
     }
 
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
-        $class = $input->getArgument('entity');
+        $entity = $input->getArgument('entity');
+        $classes = 'All' === $entity ? $this->entityChoices() : [$entity];
 
+        foreach ($classes as $class) {
+            $this->generateFactory($class, $input, $io, $generator);
+        }
+    }
+
+    /**
+     * Generates a single entity factory.
+     */
+    private function generateFactory(string $class, InputInterface $input, ConsoleStyle $io, Generator $generator)
+    {
         if (!\class_exists($class)) {
             $class = $generator->createClassNameDetails($class, 'Entity\\')->getFullName();
         }
@@ -88,12 +137,22 @@ final class MakeFactory extends AbstractMaker
             throw new RuntimeCommandException(\sprintf('Entity "%s" not found.', $input->getArgument('entity')));
         }
 
+        $namespace = $input->getOption('namespace');
+
+        // strip maker's root namespace if set
+        if (0 === \mb_strpos($namespace, $generator->getRootNamespace())) {
+            $namespace = \mb_substr($namespace, \mb_strlen($generator->getRootNamespace()));
+        }
+
+        $namespace = \trim($namespace, '\\');
+
+        // if creating in tests dir, ensure namespace prefixed with Tests\
+        if ($input->getOption('test') && 0 !== \mb_strpos($namespace, 'Tests\\')) {
+            $namespace = 'Tests\\'.$namespace;
+        }
+
         $entity = new \ReflectionClass($class);
-        $factory = $generator->createClassNameDetails(
-            $entity->getShortName(),
-            $input->getOption('test') ? 'Tests\\'.$input->getOption('namespace') : $input->getOption('namespace'),
-            'Factory'
-        );
+        $factory = $generator->createClassNameDetails($entity->getShortName(), $namespace, 'Factory');
 
         $repository = new \ReflectionClass($this->managerRegistry->getRepository($entity->getName()));
 
@@ -107,6 +166,7 @@ final class MakeFactory extends AbstractMaker
             __DIR__.'/../Resources/skeleton/Factory.tpl.php',
             [
                 'entity' => $entity,
+                'defaultProperties' => $this->defaultPropertiesFor($entity->getName(), $input->getOption('all-fields')),
                 'repository' => $repository,
             ]
         );
@@ -117,13 +177,8 @@ final class MakeFactory extends AbstractMaker
 
         $io->text([
             'Next: Open your new factory and set default values/states.',
-            'Find the documentation at https://github.com/zenstruck/foundry#model-factories',
+            'Find the documentation at https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories',
         ]);
-    }
-
-    public function configureDependencies(DependencyBuilder $dependencies): void
-    {
-        // noop
     }
 
     private function entityChoices(): array
@@ -132,6 +187,9 @@ final class MakeFactory extends AbstractMaker
 
         foreach ($this->managerRegistry->getManagers() as $manager) {
             foreach ($manager->getMetadataFactory()->getAllMetadata() as $metadata) {
+                if ($metadata->getReflectionClass()->isAbstract()) {
+                    continue;
+                }
                 if (!\in_array($metadata->getName(), $this->entitiesWithFactories, true)) {
                     $choices[] = $metadata->getName();
                 }
@@ -141,9 +199,37 @@ final class MakeFactory extends AbstractMaker
         \sort($choices);
 
         if (empty($choices)) {
-            throw new RuntimeCommandException('No entities found.');
+            throw new RuntimeCommandException('No entities or documents found, or none left to make factories for.');
         }
 
         return $choices;
+    }
+
+    private function defaultPropertiesFor(string $class, bool $allFields): iterable
+    {
+        $em = $this->managerRegistry->getManagerForClass($class);
+
+        if (!$em instanceof EntityManagerInterface) {
+            return [];
+        }
+
+        $metadata = $em->getClassMetadata($class);
+        $ids = $metadata->getIdentifierFieldNames();
+
+        foreach ($metadata->fieldMappings as $property) {
+            // ignore identifiers and nullable fields
+            if ((!$allFields && ($property['nullable'] ?? false)) || \in_array($property['fieldName'], $ids, true)) {
+                continue;
+            }
+
+            $type = \mb_strtoupper($property['type']);
+            $value = "null, // TODO add {$type} ORM type manually";
+
+            if (\array_key_exists($type, self::ORM_DEFAULTS)) {
+                $value = self::ORM_DEFAULTS[$type];
+            }
+
+            yield $property['fieldName'] => $value;
+        }
     }
 }

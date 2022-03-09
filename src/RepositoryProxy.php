@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Foundry;
 
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectRepository;
@@ -164,7 +165,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
     }
 
     /**
-     * @return Proxy|object|null
+     * @return Proxy&TProxiedObject|null
      *
      * @psalm-return Proxy<TProxiedObject>|null
      */
@@ -174,7 +175,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
     }
 
     /**
-     * @return Proxy|object|null
+     * @return Proxy&TProxiedObject|null
      *
      * @psalm-return Proxy<TProxiedObject>|null
      */
@@ -188,6 +189,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
      */
     public function truncate(): void
     {
+        /** @var DocumentManager $om */
         $om = Factory::configuration()->objectManagerFor($this->getClassName());
 
         if ($om instanceof EntityManagerInterface) {
@@ -196,11 +198,9 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
             return;
         }
 
-        foreach ($this as $object) {
-            $om->remove($object);
+        if ($om instanceof DocumentManager) {
+            $om->getDocumentCollection($this->getClassName())->deleteMany([]);
         }
-
-        $om->flush();
     }
 
     /**
@@ -208,7 +208,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
      *
      * @param array $attributes The findBy criteria
      *
-     * @return Proxy|object
+     * @return Proxy&TProxiedObject
      *
      * @throws \RuntimeException if no objects are persisted
      *
@@ -276,7 +276,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
     /**
      * @param object|array|mixed $criteria
      *
-     * @return Proxy|object|null
+     * @return Proxy&TProxiedObject|null
      *
      * @psalm-param Proxy<TProxiedObject>|array|mixed $criteria
      * @psalm-return Proxy<TProxiedObject>|null
@@ -314,7 +314,7 @@ final class RepositoryProxy implements ObjectRepository, \IteratorAggregate, \Co
     /**
      * @param array|null $orderBy Some ObjectRepository's (ie Doctrine\ORM\EntityRepository) add this optional parameter
      *
-     * @return Proxy|object|null
+     * @return Proxy&TProxiedObject|null
      *
      * @throws \RuntimeException if the wrapped ObjectRepository does not have the $orderBy parameter
      *

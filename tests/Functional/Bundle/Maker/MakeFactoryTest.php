@@ -5,6 +5,8 @@ namespace Zenstruck\Foundry\Tests\Functional\Bundle\Maker;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
 use Symfony\Component\Console\Tester\CommandTester;
+use Zenstruck\Foundry\Tests\Fixtures\Document\Comment;
+use Zenstruck\Foundry\Tests\Fixtures\Document\Post;
 use Zenstruck\Foundry\Tests\Fixtures\Entity\Category;
 use Zenstruck\Foundry\Tests\Fixtures\Entity\Tag;
 
@@ -35,9 +37,11 @@ use Zenstruck\\Foundry\\ModelFactory;
 use Zenstruck\\Foundry\\Proxy;
 
 /**
+ * @extends ModelFactory<Category>
+ *
  * @method static Category|Proxy createOne(array \$attributes = [])
- * @method static Category[]|Proxy[] createMany(int \$number, \$attributes = [])
- * @method static Category|Proxy find(\$criteria)
+ * @method static Category[]|Proxy[] createMany(int \$number, array|callable \$attributes = [])
+ * @method static Category|Proxy find(object|array|mixed \$criteria)
  * @method static Category|Proxy findOrCreate(array \$attributes)
  * @method static Category|Proxy first(string \$sortedField = 'id')
  * @method static Category|Proxy last(string \$sortedField = 'id')
@@ -47,7 +51,7 @@ use Zenstruck\\Foundry\\Proxy;
  * @method static Category[]|Proxy[] findBy(array \$attributes)
  * @method static Category[]|Proxy[] randomSet(int \$number, array \$attributes = [])
  * @method static Category[]|Proxy[] randomRange(int \$min, int \$max, array \$attributes = [])
- * @method Category|Proxy create(\$attributes = [])
+ * @method Category|Proxy create(array|callable \$attributes = [])
  */
 final class CategoryFactory extends ModelFactory
 {
@@ -55,21 +59,22 @@ final class CategoryFactory extends ModelFactory
     {
         parent::__construct();
 
-        // TODO inject services if required (https://github.com/zenstruck/foundry#factories-as-services)
+        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
     protected function getDefaults(): array
     {
         return [
-            // TODO add your default values here (https://github.com/zenstruck/foundry#model-factories)
+            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
+            'name' => self::faker()->text(),
         ];
     }
 
     protected function initialize(): self
     {
-        // see https://github.com/zenstruck/foundry#initialization
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return \$this
-            // ->afterInstantiate(function(Category \$category) {})
+            // ->afterInstantiate(function(Category \$category): void {})
         ;
     }
 
@@ -110,9 +115,11 @@ use Zenstruck\\Foundry\\ModelFactory;
 use Zenstruck\\Foundry\\Proxy;
 
 /**
+ * @extends ModelFactory<Tag>
+ *
  * @method static Tag|Proxy createOne(array \$attributes = [])
- * @method static Tag[]|Proxy[] createMany(int \$number, \$attributes = [])
- * @method static Tag|Proxy find(\$criteria)
+ * @method static Tag[]|Proxy[] createMany(int \$number, array|callable \$attributes = [])
+ * @method static Tag|Proxy find(object|array|mixed \$criteria)
  * @method static Tag|Proxy findOrCreate(array \$attributes)
  * @method static Tag|Proxy first(string \$sortedField = 'id')
  * @method static Tag|Proxy last(string \$sortedField = 'id')
@@ -122,7 +129,7 @@ use Zenstruck\\Foundry\\Proxy;
  * @method static Tag[]|Proxy[] findBy(array \$attributes)
  * @method static Tag[]|Proxy[] randomSet(int \$number, array \$attributes = [])
  * @method static Tag[]|Proxy[] randomRange(int \$min, int \$max, array \$attributes = [])
- * @method Tag|Proxy create(\$attributes = [])
+ * @method Tag|Proxy create(array|callable \$attributes = [])
  */
 final class TagFactory extends ModelFactory
 {
@@ -130,21 +137,22 @@ final class TagFactory extends ModelFactory
     {
         parent::__construct();
 
-        // TODO inject services if required (https://github.com/zenstruck/foundry#factories-as-services)
+        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
     protected function getDefaults(): array
     {
         return [
-            // TODO add your default values here (https://github.com/zenstruck/foundry#model-factories)
+            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
+            'name' => self::faker()->text(),
         ];
     }
 
     protected function initialize(): self
     {
-        // see https://github.com/zenstruck/foundry#initialization
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return \$this
-            // ->afterInstantiate(function(Tag \$tag) {})
+            // ->afterInstantiate(function(Tag \$tag): void {})
         ;
     }
 
@@ -181,9 +189,11 @@ use Zenstruck\\Foundry\\ModelFactory;
 use Zenstruck\\Foundry\\Proxy;
 
 /**
+ * @extends ModelFactory<Category>
+ *
  * @method static Category|Proxy createOne(array \$attributes = [])
- * @method static Category[]|Proxy[] createMany(int \$number, \$attributes = [])
- * @method static Category|Proxy find(\$criteria)
+ * @method static Category[]|Proxy[] createMany(int \$number, array|callable \$attributes = [])
+ * @method static Category|Proxy find(object|array|mixed \$criteria)
  * @method static Category|Proxy findOrCreate(array \$attributes)
  * @method static Category|Proxy first(string \$sortedField = 'id')
  * @method static Category|Proxy last(string \$sortedField = 'id')
@@ -193,7 +203,7 @@ use Zenstruck\\Foundry\\Proxy;
  * @method static Category[]|Proxy[] findBy(array \$attributes)
  * @method static Category[]|Proxy[] randomSet(int \$number, array \$attributes = [])
  * @method static Category[]|Proxy[] randomRange(int \$min, int \$max, array \$attributes = [])
- * @method Category|Proxy create(\$attributes = [])
+ * @method Category|Proxy create(array|callable \$attributes = [])
  */
 final class CategoryFactory extends ModelFactory
 {
@@ -201,21 +211,22 @@ final class CategoryFactory extends ModelFactory
     {
         parent::__construct();
 
-        // TODO inject services if required (https://github.com/zenstruck/foundry#factories-as-services)
+        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
     protected function getDefaults(): array
     {
         return [
-            // TODO add your default values here (https://github.com/zenstruck/foundry#model-factories)
+            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
+            'name' => self::faker()->text(),
         ];
     }
 
     protected function initialize(): self
     {
-        // see https://github.com/zenstruck/foundry#initialization
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return \$this
-            // ->afterInstantiate(function(Category \$category) {})
+            // ->afterInstantiate(function(Category \$category): void {})
         ;
     }
 
@@ -256,9 +267,11 @@ use Zenstruck\\Foundry\\ModelFactory;
 use Zenstruck\\Foundry\\Proxy;
 
 /**
+ * @extends ModelFactory<Tag>
+ *
  * @method static Tag|Proxy createOne(array \$attributes = [])
- * @method static Tag[]|Proxy[] createMany(int \$number, \$attributes = [])
- * @method static Tag|Proxy find(\$criteria)
+ * @method static Tag[]|Proxy[] createMany(int \$number, array|callable \$attributes = [])
+ * @method static Tag|Proxy find(object|array|mixed \$criteria)
  * @method static Tag|Proxy findOrCreate(array \$attributes)
  * @method static Tag|Proxy first(string \$sortedField = 'id')
  * @method static Tag|Proxy last(string \$sortedField = 'id')
@@ -268,7 +281,7 @@ use Zenstruck\\Foundry\\Proxy;
  * @method static Tag[]|Proxy[] findBy(array \$attributes)
  * @method static Tag[]|Proxy[] randomSet(int \$number, array \$attributes = [])
  * @method static Tag[]|Proxy[] randomRange(int \$min, int \$max, array \$attributes = [])
- * @method Tag|Proxy create(\$attributes = [])
+ * @method Tag|Proxy create(array|callable \$attributes = [])
  */
 final class TagFactory extends ModelFactory
 {
@@ -276,21 +289,22 @@ final class TagFactory extends ModelFactory
     {
         parent::__construct();
 
-        // TODO inject services if required (https://github.com/zenstruck/foundry#factories-as-services)
+        // TODO inject services if required (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services)
     }
 
     protected function getDefaults(): array
     {
         return [
-            // TODO add your default values here (https://github.com/zenstruck/foundry#model-factories)
+            // TODO add your default values here (https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories)
+            'name' => self::faker()->text(),
         ];
     }
 
     protected function initialize(): self
     {
-        // see https://github.com/zenstruck/foundry#initialization
+        // see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
         return \$this
-            // ->afterInstantiate(function(Tag \$tag) {})
+            // ->afterInstantiate(function(Tag \$tag): void {})
         ;
     }
 
@@ -332,13 +346,15 @@ EOF
     public function can_customize_namespace(): void
     {
         $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+        $expectedFile = self::tempFile('src/My/Namespace/TagFactory.php');
 
-        $this->assertFileDoesNotExist(self::tempFile('src/My/Namespace/TagFactory.php'));
+        $this->assertFileDoesNotExist($expectedFile);
 
         $tester->setInputs([Tag::class]);
         $tester->execute(['--namespace' => 'My\\Namespace']);
 
-        $this->assertFileExists(self::tempFile('src/My/Namespace/TagFactory.php'));
+        $this->assertFileExists($expectedFile);
+        $this->assertStringContainsString('namespace App\\My\\Namespace;', \file_get_contents($expectedFile));
     }
 
     /**
@@ -347,12 +363,97 @@ EOF
     public function can_customize_namespace_with_test_flag(): void
     {
         $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+        $expectedFile = self::tempFile('tests/My/Namespace/TagFactory.php');
 
-        $this->assertFileDoesNotExist(self::tempFile('tests/My/Namespace/TagFactory.php'));
+        $this->assertFileDoesNotExist($expectedFile);
 
         $tester->setInputs([Tag::class]);
         $tester->execute(['--namespace' => 'My\\Namespace', '--test' => true]);
 
-        $this->assertFileExists(self::tempFile('tests/My/Namespace/TagFactory.php'));
+        $this->assertFileExists($expectedFile);
+        $this->assertStringContainsString('namespace App\\Tests\\My\\Namespace;', \file_get_contents($expectedFile));
+    }
+
+    /**
+     * @test
+     */
+    public function can_customize_namespace_with_root_namespace_prefix(): void
+    {
+        $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+        $expectedFile = self::tempFile('src/My/Namespace/TagFactory.php');
+
+        $this->assertFileDoesNotExist($expectedFile);
+
+        $tester->setInputs([Tag::class]);
+        $tester->execute(['--namespace' => 'App\\My\\Namespace']);
+
+        $this->assertFileExists($expectedFile);
+        $this->assertStringContainsString('namespace App\\My\\Namespace;', \file_get_contents($expectedFile));
+    }
+
+    /**
+     * @test
+     */
+    public function can_customize_namespace_with_test_flag_with_root_namespace_prefix(): void
+    {
+        $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+        $expectedFile = self::tempFile('tests/My/Namespace/TagFactory.php');
+
+        $this->assertFileDoesNotExist($expectedFile);
+
+        $tester->setInputs([Tag::class]);
+        $tester->execute(['--namespace' => 'App\\Tests\\My\\Namespace', '--test' => true]);
+
+        $this->assertFileExists($expectedFile);
+        $this->assertStringContainsString('namespace App\\Tests\\My\\Namespace;', \file_get_contents($expectedFile));
+    }
+
+    /**
+     * @test
+     */
+    public function can_create_factory_with_all_interactively(): void
+    {
+        $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+
+        $this->assertFileDoesNotExist(self::tempFile('src/Factory/CategoryFactory.php'));
+        $this->assertFileDoesNotExist(self::tempFile('src/Factory/PostFactory.php'));
+
+        $tester->setInputs(['All']);
+
+        try {
+            $tester->execute([]);
+        } catch (RuntimeCommandException $e) {
+            // todo find a better solution
+            // because we have fixtures with the same name, the maker will fail when creating the duplicate
+        }
+
+        $this->assertFileExists(self::tempFile('src/Factory/CategoryFactory.php'));
+        $this->assertFileExists(self::tempFile('src/Factory/PostFactory.php'));
+    }
+
+    /**
+     * @test
+     * @dataProvider documentProvider
+     */
+    public function can_create_factory_for_odm(string $class, string $file): void
+    {
+        if (false === \getenv('MONGO_URL')) {
+            self::markTestSkipped('doctrine/odm not enabled.');
+        }
+
+        $tester = new CommandTester((new Application(self::bootKernel()))->find('make:factory'));
+
+        $this->assertFileDoesNotExist(self::tempFile("src/Factory/{$file}.php"));
+
+        $tester->setInputs([$class]);
+        $tester->execute([]);
+
+        $this->assertFileExists(self::tempFile("src/Factory/{$file}.php"));
+    }
+
+    public function documentProvider(): iterable
+    {
+        yield 'document' => [Post::class, 'PostFactory'];
+        yield 'embedded document' => [Comment::class, 'CommentFactory'];
     }
 }

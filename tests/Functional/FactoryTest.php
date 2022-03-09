@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Foundry\AnonymousFactory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
+use Zenstruck\Foundry\Tests\Fixtures\Entity\Address;
 use Zenstruck\Foundry\Tests\Fixtures\Entity\Category;
 use Zenstruck\Foundry\Tests\Fixtures\Entity\Post;
 use Zenstruck\Foundry\Tests\Fixtures\Entity\Tag;
@@ -18,6 +19,13 @@ use function Zenstruck\Foundry\factory;
 final class FactoryTest extends KernelTestCase
 {
     use Factories, ResetDatabase;
+
+    protected function setUp(): void
+    {
+        if (false === \getenv('DATABASE_URL')) {
+            self::markTestSkipped('doctrine/orm not enabled.');
+        }
+    }
 
     /**
      * @test
@@ -121,5 +129,17 @@ final class FactoryTest extends KernelTestCase
         ]);
 
         $this->assertNotNull($object->getCategory()->getId());
+    }
+
+    /**
+     * @test
+     */
+    public function can_create_embeddable(): void
+    {
+        $object1 = (new AnonymousFactory(Address::class))->create();
+        $object2 = (new AnonymousFactory(Address::class))->create(['value' => 'an address']);
+
+        $this->assertNull($object1->getValue());
+        $this->assertSame('an address', $object2->getValue());
     }
 }
